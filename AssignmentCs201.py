@@ -7,13 +7,14 @@ class NFA:
         self.F = []  # accepting states of NFA
         self.M = [[0 for i in range(len(self.Sigma))]
                   for j in range(len(self.Q))]
-        self.q0 = []  # initial state of the required DFA 
+        self.q0 = []  # initial state of the required DFA
         self.F_DFA = []  # accepting states of the DFA
         # list for storing the alphabets(symbols) except epsilon
         self.A1 = []
 
     def states(self):  # function for storing the states of the NFA
-        n = int(input("Provide the number of states in your Non deterministic Finite Automaton : "))
+        n = int(input(
+            "Provide the number of states in your Non deterministic Finite Automaton : "))
 
         print("Give inputs i.e. the states in the form of a character ")
         print("give the initial state in the 1st input")
@@ -25,7 +26,8 @@ class NFA:
         print(self.Q)
 
     def alpahabet(self):  # function for storing the alphabets(symbols) of the NFA
-        n1 = int(input("Provide the number of elements in the alphabet set : "))
+        n1 = int(input(
+            "Provide the number of elements in the alphabet set excluding epsilion: "))+1
 
         print("Give inputs i.e. the alphabets in the form of a character or a single digit")
         for i in range(0, n1):
@@ -63,7 +65,8 @@ class NFA:
 
     def matrix_store(self, i, j):  # method for defining the delta function of the NFA
 
-        n = int(input(" give the number of states at which " + str(self.Q[i]) + " can transit after getting the symbol " + str(self.Sigma[j])+" : "))
+        n = int(input(" give the number of states at which " +
+                      str(self.Q[i]) + " can transit after getting the symbol " + str(self.Sigma[j])+" : "))
         list = []
 
         for t in range(0, n):
@@ -197,8 +200,7 @@ class NFA:
         L = self.dfa_states_store(0, [self.q0])
         l = len(L[0])
 
-        x = int(input(print("Do you want to see the states of the constructed DFA from the given NFA? If 'yes : press 1, else : press 0.  Thank you")))
-
+        x = int(input("Do you want to see the states of the constructed DFA from the given NFA? If 'yes : press 1, else : press 0.  Thank you\n"))
         if x == 1:
             print(" The states of the DFA are :")
             for i in range(0, l):
@@ -210,7 +212,7 @@ class NFA:
         L = self.dfa_states_store(0, [self.q0])
         l = len(L[0])
 
-        x = int(input(print("Do you want to see the transition of the states of the constructed DFA, when acted upon by the alphabets? If 'yes : press 1, else : press 0.  Thank you")))
+        x = int(input("Do you want to see the transition of the states of the constructed DFA, when acted upon by the alphabets? If 'yes : press 1, else : press 0.  Thank you\n"))
 
         if x == 1:
             for i in range(0, l):
