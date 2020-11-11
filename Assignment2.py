@@ -1,270 +1,161 @@
-import xlrd
-import os
-
-class Minimization:
-
-
-
-    
-
-    def __init__(self):
-        self.file_location='' #file location of the excel file
-
-        self.Q =[] #['a','b','c','d','e','f'] list of finite states in the DFA
-        self.A =[] #['0','1'] # alphabet set in the DFA
-        self.q_0 = '' #'a'  # initial state of DFA
-        self.F = [] # ['b','c','e']  # accepting states of DFA
-        self.M =[] #[['d','b'],['c','f'],['c','f'],['a','e'],['c','f'],['f','f']]
-        self.P_0=[] # for storing the initial partition
-        self.q_1=''
-        self.q_2=''
-        self.P_new=[] # list for storing the states of the newly formed minimized DFA
-        self.q_0_new=[] # list for storing the initial state of the newly formed minimized DFA
-        self.F_new=[] # accepting states of the newly formed minimized DFA
-        self.delta_new=[] # matrix for storing the new transition values(states) of the new states after being acted upon by the given alphabets 
-
-        #self.T_L=[]
-
-    def file_loc(self):
-        self.file_location =input('give the location of the excel file'+ " :")
-
-        #self.file_location ='.\DFA.xlsx'
-
-
-
-
-
-    def states(self):  # function for storing the states of the DFA
-
-        workbook=xlrd.open_workbook(self.file_location)
-        sheet=workbook.sheet_by_index(0)  #sheet in which the states of the DFA are present in the first row, in the form of single characters
-
-        self.Q=sheet.row_values(0)
-        print(self.Q)
-
-
-
-    def alpahabet(self):  # function for storing the alphabets(symbols) of the DFA
-        workbook = xlrd.open_workbook(self.file_location)
-        sheet = workbook.sheet_by_index(1)  # sheet in which the alphabets of the DFA are present in the first row, in the form of single characters
-        self.A= sheet.row_values(0)
-        print(self.A)
-
-    def ini_state(self):
-        workbook = xlrd.open_workbook(self.file_location)
-        sheet = workbook.sheet_by_index(2)  # sheet in which the first shell is occupied by the initial state of the DFA
-        self.q_0= sheet.row_values(0)
-        print(self.q_0)
-
-    def delta_function_matrix(self):
-        workbook = xlrd.open_workbook(self.file_location)
-        sheet = workbook.sheet_by_index(3)
-        self.M = [[sheet.cell_value(r,c) for c in range(sheet.ncols)] for r in range(sheet.nrows)]
-        print(self.M)
-
-
-
-    def accepting_state_DFA(self):  # storing the final states
-        workbook = xlrd.open_workbook(self.file_location)
-        sheet = workbook.sheet_by_index(4)  # sheet in which the final states of the DFA are present in the first row.
-        self.F = sheet.row_values(0)
-        print(self.F)
-
-    def zero_level_partition(self):
-        S=[]
-
-        for i in range(0,len(self.Q)):
-            if self.Q[i] not in self.F:
-                S.append(self.Q[i])  # S is the list of all states that are not accepting
-
-        self.P_0=[S,self.F] #zero level partition formed
-        print(self.P_0)
-
-
-
-
-    def partition(self,P):
-
-        P1=[]
-        T=[]
-        U=[]
-
-        for i in range(0,len(P)):
-            T=self.partition_1(P[i],P) #partition of P[i]
-            U=U+T
-            #print(U) #new partition
-            
-            
-        ctr=0
-        for i in range(0,len(U)):
-            
-            if U[i] in P:
-                ctr=ctr+1
-        if ctr==len(U):
-            
-            print(P)
-            self.P_new=P
-            return P
-                        #base case
-                                #P contains lists, each of which can be thought of as the states of the new minimized DFA
-        else:
-            self.partition(U)  # i.e if new partitions are created, iterate the function once more
-
-
-    def partition_1(self, P_i, P):
-        L=[]
-        t=0
-        lst=[]
-        j=0
-        i=0
-
-        for i in range(0, len(P_i)):
-            #print(len(P_i))
-            lst=[P_i[i]]
-            #print(lst)
-
-            for j in range(0,len(P_i)):
-                ctr=0
-
-                if j!=i:
-                    
-                    for k in range(0, len(self.A)):
-
-                        self.q_1= self.transition(P_i[i],self.A[k])
-                        self.q_2= self.transition(P_i[j],self.A[k])
-                        #print(self.A[k])
-                        #print(P_i[i]+" "+P_i[j])
-                        #print( self.q_1 +" "+self.q_2 )
-
-                        flag=0
-
-                        for l in range(0,len(P)):
-
-                            if self.q_1 in P[l] and self.q_2 in P[l]: #checking whether q1 and q2 are present in some partition of P
-                            
-                                flag=1  #indicating q1 & q2 belongs to A where A is an element in the list P
-
-                    
-
-                        if flag==1:
-                        
-                            ctr=ctr+1
-
-                    if ctr== len(self.A):
-                        #print(ctr)
-                        lst.append(P_i[j])
-                        #print(lst)
-
-            if L==[]:
-                #print(len(L))
-                L.append(lst)
-                #print(L)
-            else:
-
-                for i in range(0,len(L)):
-                    #print(len(L))
-                    #print(L)
-                    if set(lst)!=set(L[i]):
-                        t=t+1
-                        #print(t)
-                if t==len(L):
-                    L.append(lst)
-                    #print(L)
-
-        #print(L)
-        return L #returning the collection of all the partitions of P_i where P_i is an element of P
-
-    def transition(self, q, s):
-        state_index= self.Q.index(q)
-        
-        
-        alphabet_index=self.A.index(s)
-        
-        #print(self.M[state_index][alphabet_index])
-
-        return self.M[state_index][alphabet_index]  #returning the state at which 'q' will reach after acting upon the alphabet 's'
-    
-    def final_states_new(self):
-        for i in range(0,len(self.P_new)):
-            if self.subset(self.P_new[i],self.F):
-                self.F_new.append(self.P_new[i])
-        print(" The accepting states of the newly formed minimized DFA---->"+ str(self.F_new))
-
-    def subset(self,L_1,L_2):
-        ctr=0
-        for i in range(0,len(L_1)):
-            if L_1[i] in L_2:
-                ctr=ctr+1
-        if ctr==len(L_1):
-            return True
-        else:
-            return False
-
-    def new_initial_state(self):
-        for i in range(0,len(self.P_new)):
-            if self.q_0[0] in self.P_new[i]:
-                self.q_0_new=self.P_new[i]
-        print("The initial state of the modified DFA---->"+str(self.q_0_new))
-
-    def transit_value_storing(self):
-        for i in range(0,len(self.P_new)):
-            self.delta_new.append(self.new_transition(self.P_new[i]))
-    
-    def new_transition(self,L):
-        lst=[]
-        trans_L=[]
-
-        for i in range(0,len(self.A)):
-            lst=self.new_transition_func(L,self.A[i])
-            
-            trans_L.append(lst)
-            print("delta( " + str(L)+" , "+str(self.A[i])+" )--->"+str(lst))
-        
-        #print(trans_L)
-        return trans_L
-    
-    def new_transition_func(self, L, c):
-        state_0=L[0]
-        state_T=self.M[self.Q.index(state_0)][self.A.index(c)]
-        #print(state_T)
-
-        for i in range(0,len(self.P_new)):
-            if state_T in self.P_new[i]:
-                #print(i)
-                break
-        #print(self.P_new[i])
-        return self.P_new[i]
-
-
-
-
-
-
-
-
-
-M= Minimization()
-M.file_loc()
-M.states()
-M.alpahabet()
-M.ini_state()
-M.delta_function_matrix()
-M.accepting_state_DFA()
-
-M.zero_level_partition()
-
-#M.partition_1()
-#M.transition()
-M.partition(M.P_0)
-M.final_states_new()
-M.new_initial_state()
-M.transit_value_storing()
-#M.new_transition_func(['a','d'],M.A[1])
-#M.new_transition(['a','d'])
-
-
-
-
-
-
-
+# Reading the file holding the DFA
+f = open("Assignment2_DFA.txt", "rt")#FILE WHERE DFA IS STORED
+
+# printing the states
+states_1 = []
+print(f.readline().strip())
+temp = (f.readline()).strip()
+for i in temp:
+    states_1.append(i)
+print(states_1)
+
+
+# printing the Final states
+final_state_1 = []
+print(f.readline().strip())
+temp = (f.readline()).strip()
+for i in temp:
+    final_state_1.append(i)
+print(final_state_1)
+
+# creating the DFA
+DFA_1 = []  # To store the DFA
+
+f.readline()  # just to avoid the emptyline
+f.readline()  # just to avoid the stateinput1input2
+for i in f:
+    arr = []
+    for j in i.strip():
+        arr.append(j)
+    DFA_1.append(arr)
+# print(DFA_1)
+
+# function to check if the states are equivalent.
+
+
+def check(a, b):
+    label0 = False
+    label1 = False
+    for i in DFA_1:
+        if i[0] == a:
+            in_0_a = i[1]
+            in_1_a = i[2]
+        if i[0] == b:
+            in_0_b = i[1]
+            in_1_b = i[2]
+    for i in prev_equivalence:  # compare both for each input
+        if in_0_a in i and in_0_b in i:
+            label0 = True
+        if in_1_a in i and in_1_b in i:
+            label1 = True
+
+    # if both 0 and 1 input are True
+    if label0 and label1:
+        return True
+    else:
+        return False
+
+
+# I have used the partitioning method. in which i find the zero equivalence,
+# one equivalence ..... n equivalence till n and n-1 equivalence are identical
+# thereby treating the equivalent states as 1 state a new DFA has been created
+# finding the zero equivalent
+zero_equivalence = []
+
+
+# separate the non final states from final states
+a = []  # to store all the nonfinal states
+for i in states_1:
+    if i not in final_state_1:
+        a.append(i)
+# basically we separated the final states and the non final states
+zero_equivalence = [a, final_state_1]
+prev_equivalence = zero_equivalence
+
+
+# function to create a new equivalence
+
+def equi_func(p_equi):
+    new_equi = []
+    for i in p_equi:
+        arr = i
+        while arr:
+            reject = []  # this will collect the rest for another round
+            accept = []  # this will append the equivalent states to new_equi
+            accept.append(arr[0])
+            for j in range(1, len(arr)):
+                if check(arr[0], arr[j]):  # collecting equivalent states
+                    accept.append(arr[j])
+                else:
+                    reject.append(arr[j])  # collecting the rest
+            new_equi.append(accept)
+            arr = reject  # updating the arr value so that it can parse through the reject states
+    return new_equi
+
+
+# perform next equivalence based on the Zero equivalence
+curr_equivalence = []
+for i in states_1:
+    curr_equivalence = equi_func(prev_equivalence)
+    if curr_equivalence == prev_equivalence:  # if two continuous equivalence are same we stop
+        break
+    prev_equivalence = curr_equivalence  # updating for next round
+
+
+def output(a):  # we took the set of states and we will find the output in this function
+    out_0 = []  # to store all 0 input output states
+    out_1 = []  # to store all 1 input output states
+    for i in a:
+        in_0 = in_1 = None
+        for j in DFA_1:  # we extracted the output per state
+            if j[0] == i:
+                in_0 = j[1]
+                in_1 = j[2]
+            if in_0 not in out_0 and in_0 is not None:  # to match the 0 union to exiting state
+                out_0.append(in_0)
+            if in_1 not in out_1 and in_1 is not None:  # to match the 1 union to exiting state
+                out_1.append(in_1)
+    return out_0, out_1
+
+
+def plot(states_2):  # this basically creates the minimized dfa
+    global DFA_2
+    for i in states_2:
+        arr = []
+        arr.append(i)
+        out_0, out_1 = output(i)  # returns both union outputs
+        for j in states_2:
+            if out_0[0] in j:
+                arr.append(j)
+        for j in states_2:
+            if out_1[0] in j:
+                arr.append(j)
+        DFA_2.append(arr)
+
+
+def final():  # to find all the final state of minimized DFA
+    f_state = []  # to store the final state
+    for i in final_state_1:  # all states containing initial final states are final states
+        for j in states_2:
+            if i in j:
+                if j not in f_state:  # to prevent appending of same states multiple times
+                    f_state.append(j)
+    return f_state
+
+
+# creating the minimized DFA
+states_2 = curr_equivalence
+final_state_2 = final()
+DFA_2 = []
+plot(states_2)
+
+
+# Printing the minimized DFA
+print("\nState\tInput 1\tInput 2")
+for i in DFA_2:
+    print(f"{i[0]}\t{i[1]}\t{i[2]}")
+
+# printing the final states for minimized DFA
+print("\nFINAL STATES")
+for i in final_state_2:
+    print(i)
